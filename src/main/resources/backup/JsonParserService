@@ -1,0 +1,228 @@
+
+
+ /* public Mono<Map<String, Integer>> parseBuildingResponse(String name) {
+    return remoteService.loadBuildingsByLgaName(name)
+      .publishOn(Schedulers.boundedElastic())
+      .flatMap(response -> {
+        try {
+          // Parse JSON response
+          JsonNode rootNode = objectMapper.readTree(response);
+          JsonNode dataNode = rootNode.get("data");
+
+          int addedCount = 0;
+          int rejectedCount = 0;
+
+          // Process the "data" array
+          if (dataNode != null && dataNode.isArray()) {
+            for (JsonNode node : dataNode) {
+              // Get LGA, Classification, and Zone
+              Optional<LGA> lgaOne = lgaRepository.findByLgaName(node.get("LGA").asText());
+              Optional<PropertyList> propertyList = propertyListRepository.findByBuildingCode(node.get("Bld_ID").asText());
+              Optional<PropertyClassification> propertyClassification = propertyClassificationRepository.findByName(node.get("Bld_Cat").asText());
+              Optional<Zone> zoneOne = zoneRepository.findByZone(node.get("Zone").asText());
+
+              if (lgaOne.isPresent() && propertyClassification.isPresent() && zoneOne.isPresent()) {
+                if (propertyList.isEmpty()) {
+                  // Create and save a new PropertyList
+                  PropertyList pList = new PropertyList();
+                  pList.setAddress(node.get("Street").asText());
+                  pList.setArea(node.get("Bld_area").asText());
+                  pList.setBuildingCode(node.get("Bld_ID").asText());
+                  pList.setOwnerName(node.get("Owner").asText());
+                  pList.setLga(lgaOne.get());
+                  pList.setBorehole(node.get("Bld_Storey").asInt());
+                  pList.setImage(node.get("Photo").asText());
+                  pList.setPower(Objects.equals(node.get("Power").asText(), "Yes") ? 1 : 0);
+                  pList.setWater(Objects.equals(node.get("Water").asText(), "Yes") ? 1 : 0);
+                  pList.setZoneName(node.get("Zone").asText());
+
+                  String pavCode = node.get("Zone").asText() +
+                    propertyClassification.get().getId() +
+                    node.get("Occupant").asText();
+
+                  pList.setPavCode(pavCode);
+                  pList.setOwnerKgtin(node.get("KGTIN").asText());
+                  pList.setCreatedAt(LocalDateTime.now());
+                  pList.setUpdatedAt(LocalDateTime.now());
+                  pList.setPropertyClassification(propertyClassification.get());
+
+                  propertyListRepository.save(pList);
+                  addedCount++;
+                } else {
+                  rejectedCount++;
+                }
+              } else {
+                rejectedCount++;
+              }
+            }
+          }
+
+          // Prepare response map
+          Map<String, Integer> resultMap = new HashMap<>();
+          resultMap.put("added", addedCount);
+          resultMap.put("rejected", rejectedCount);
+
+          return Mono.just(resultMap);
+
+        } catch (IOException e) {
+          // Handle JSON parsing errors
+          return Mono.error(new RuntimeException("Failed to parse JSON response", e));
+        }
+      });
+  }*/
+
+
+  /*public Mono<String> parseBuildingResponse(String name) {
+    return remoteService.loadBuildingsByLgaName(name)
+      .publishOn(Schedulers.boundedElastic())
+      .flatMap(response -> {
+        try {
+          // Parse JSON response
+          JsonNode rootNode = objectMapper.readTree(response);
+          JsonNode dataNode = rootNode.get("data");
+
+          // Process the "data" array
+          StringBuilder result = new StringBuilder();
+
+          if (dataNode != null && dataNode.isArray()) {
+            for (JsonNode node : dataNode) {
+              //Get LGA
+              Optional<LGA> lgaOne = lgaRepository.findByLgaName(node.get("LGA").asText());
+              Optional<PropertyList> propertyList = propertyListRepository.findByBuildingCode(node.get("Bld_ID").asText());
+              Optional<PropertyClassification> propertyClassification = propertyClassificationRepository.findByName(node.get("Bld_Cat").asText());
+              Optional<Zone> zoneOne = zoneRepository.findByZone(node.get("Zone").asText());
+              if(lgaOne.isPresent() &&
+                propertyClassification.isPresent() &&
+                zoneOne.isPresent()
+              ){
+
+                if(propertyList.isEmpty()){
+                  String pavCode = null;
+                  PropertyList pList = new PropertyList();
+                  pList.setAddress(node.get("Street").asText());
+                  pList.setArea(node.get("Bld_area").asText());
+                  pList.setBuildingCode(node.get("Bld_ID").asText());
+                  pList.setOwnerName(node.get("Owner").asText());
+                  pList.setLga(lgaOne.get());
+                  pList.setBorehole(node.get("Bld_Storey").asInt());
+                  pList.setImage(node.get("Photo").asText());
+                  pList.setPower(Objects.equals(node.get("Power").asText(), "Yes") ? 1 : 0);
+                  pList.setWater(Objects.equals(node.get("Water").asText(), "Yes") ? 1 : 0);
+                  pList.setZoneName(node.get("Zone").asText());
+
+                  pavCode = node.get("Zone").asText() + propertyClassification.get().getId() + node.get("Occupant").asText();
+
+                  pList.setPavCode(pavCode);
+                  pList.setOwnerKgtin(node.get("KGTIN").asText());
+                  pList.setCreatedAt(LocalDateTime.now());
+                  pList.setUpdatedAt(LocalDateTime.now());
+                  pList.setPropertyClassification(propertyClassification.get());
+                  propertyListRepository.save(pList);
+
+                }else{
+                  return Mono.error(new IllegalArgumentException("No new record found"));
+                }
+
+
+              }
+
+            }
+          }
+
+          // Return the result as a Mono
+          return Mono.just(result.toString());
+
+        } catch (IOException e) {
+          // Handle JSON parsing errors
+          return Mono.error(new RuntimeException("Failed to parse JSON response", e));
+        }
+      });
+  }*/
+
+
+
+
+
+   /* public ResponseEntity<?> showBuildingsByLGA(@PathVariable String name) {
+      try {
+        return ResponseEntity.status(HttpStatus.CREATED).body(jsonParserService.parseBuildingResponse(name));
+      } catch (IllegalStateException e) {
+        // Handle the case where the bill already exists
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", e.getMessage()));
+      }
+    }*/
+
+    /*public ResponseEntity<Map<String, String>> processBilling(@RequestBody @Valid BillingCreateDTO dto) {
+      try {
+        billingService.storeBill(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "Bill processed successfully!"));
+      } catch (IllegalStateException e) {
+        // Handle the case where the bill already exists
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", e.getMessage()) );
+      } catch (IllegalArgumentException e) {
+        // Handle the case where there is nothing to process
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
+      }
+    }*/
+
+
+
+    ==============
+    public List<BillingRecordDTO> fetchBillsByPeriod(int year, int lga) {
+
+        // Fetch bills by year and LGA
+        List<Billing> bills = billingRepository.findAllByYearAndLgaId(year, lga);
+
+        // Return an empty list if no records are found
+        if (bills.isEmpty()) {
+          return Collections.emptyList();
+        }
+        // Map Billing entities to BillingRecordDTOs
+        return bills.stream().map(bill -> {
+          String lgaName = bill.getLga() != null ? bill.getLga().getLga_name() : null;
+          return BillingRecordDTO.billingRecordBuilder(
+            Math.toIntExact(bill.getB_id()),
+            bill.getBuilding_code(),
+            bill.getAssessment_no(),
+            String.valueOf(Double.parseDouble(bill.getAssessed_value())),
+            bill.getBill_amount(),
+            bill.getDate(),
+            bill.getPaid(),
+            bill.getPaid_amount(),
+            bill.getObjection(),
+            bill.getYear(),
+            lgaName
+          );
+        }).collect(Collectors.toList());
+      }
+
+
+
+
+  /*public List<BillingRecordDTO> fetchBillsByPeriod(int year, int lga) {
+
+    // Fetch bills by year and LGA
+    List<Billing> bills = billingRepository.findAllByYearAndLgaId(year, lga);
+
+    // Return an empty list if no records are found
+    if (bills.isEmpty()) {
+      return Collections.emptyList();
+    }
+    // Map Billing entities to BillingRecordDTOs
+    return bills.stream().map(bill -> {
+      String lgaName = bill.getLga() != null ? bill.getLga().getLga_name() : null;
+      return BillingRecordDTO.billingRecordBuilder(
+        Math.toIntExact(bill.getB_id()),
+        bill.getBuilding_code(),
+        bill.getAssessment_no(),
+        String.valueOf(Double.parseDouble(bill.getAssessed_value())),
+        bill.getBill_amount(),
+        bill.getDate(),
+        bill.getPaid(),
+        bill.getPaid_amount(),
+        bill.getObjection(),
+        bill.getYear(),
+        lgaName
+      );
+    }).collect(Collectors.toList());
+  }*/
